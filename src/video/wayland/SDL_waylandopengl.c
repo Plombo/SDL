@@ -52,16 +52,39 @@ Wayland_GL_LoadLibrary(_THIS, const char *path)
     EGLenum renderable_type = 0;
     EGLenum rendering_api = 0;
 
-#if SDL_VIDEO_RENDER_OGL_ES2
-    renderable_type = EGL_OPENGL_ES2_BIT;
-    rendering_api = EGL_OPENGL_ES_API;
-#elif SDL_VIDEO_RENDER_OGL_ES
-    renderable_type = EGL_OPENGL_ES_BIT;
-    rendering_api = EGL_OPENGL_ES_API;
-#elif SDL_VIDEO_RENDER_OGL
-    renderable_type = EGL_OPENGL_BIT;
-    rendering_api = EGL_OPENGL_API;
+    /* We use EGL for all rendering APIs, but the use_egl flag in SDL indicates
+     * whether we should create an ES context or a desktop GL context. */
+    if (_this->gl_config.use_egl == 0) {
+#if SDL_VIDEO_RENDER_OGL
+        renderable_type = EGL_OPENGL_BIT;
+        rendering_api = EGL_OPENGL_API;
+#else
+        SDL_SetError("SDL not configured with OpenGL support");
+        return -1;
 #endif
+    }
+    else if (_this->gl_config.major_version == 1) {
+#if SDL_VIDEO_RENDER_OGL_ES
+        renderable_type = EGL_OPENGL_ES_BIT;
+        rendering_api = EGL_OPENGL_ES_API;
+#else
+        SDL_SetError("SDL not configured with OpenGL ES 1 support");
+        return -1;
+#endif
+    }
+    else if (_this->gl_config.major_version == 2) {
+#if SDL_VIDEO_RENDER_OGL_ES2
+        renderable_type = EGL_OPENGL_ES2_BIT;
+        rendering_api = EGL_OPENGL_ES_API;
+#else
+        SDL_SetError("SDL not configured with OpenGL ES 2 support");
+        return -1;
+#endif
+    }
+    else {
+        SDL_SetError("Unsupported OpenGL ES version");
+        return -1;
+    }
 
     EGLint config_attribs[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
