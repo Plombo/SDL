@@ -124,6 +124,10 @@ pointer_handle_button(void *data, struct wl_pointer *pointer, uint32_t serial,
     enum wl_pointer_button_state state = state_w;
     uint32_t sdl_button;
 
+    if (!window) {
+        return;
+    }
+
     switch (button) {
     case BTN_LEFT:
         sdl_button = SDL_BUTTON_LEFT;
@@ -156,6 +160,10 @@ pointer_handle_axis(void *data, struct wl_pointer *pointer,
     SDL_WaylandWindow *window = input->pointer_focus;
     enum wl_pointer_axis a = axis;
     int x, y;
+
+    if (!window) {
+        return;
+    }
 
     switch (a) {
     case WL_POINTER_AXIS_VERTICAL_SCROLL:
