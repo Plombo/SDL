@@ -149,4 +149,10 @@ void Wayland_DestroyWindow(_THIS, SDL_Window *window)
     }
 }
 
+void Wayland_SetWindowSize(_THIS, SDL_Window *window)
+{
+    SDL_WaylandWindow *wind = window->driverdata;
+    wl_egl_window_resize(wind->egl_window, window->w, window->h, 0, 0);
+}
+
 /* vi: set ts=4 sw=4 expandtab: */
