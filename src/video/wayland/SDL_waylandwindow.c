@@ -155,4 +155,17 @@ void Wayland_SetWindowSize(_THIS, SDL_Window *window)
     wl_egl_window_resize(wind->egl_window, window->w, window->h, 0, 0);
 }
 
+void Wayland_SetWindowFullscreen(_THIS, SDL_Window *window, SDL_VideoDisplay *display, SDL_bool fullscreen)
+{
+    SDL_WaylandWindow *wind = window->driverdata;
+
+    if (fullscreen) {
+        wl_shell_surface_set_fullscreen(wind->shell_surface,
+                                        WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
+                                        0, NULL);
+    } else {
+        wl_shell_surface_set_toplevel(wind->shell_surface);
+    }
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

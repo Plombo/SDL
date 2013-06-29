@@ -97,6 +97,7 @@ Wayland_CreateDevice(int devindex)
     device->ShowWindow = Wayland_ShowWindow;
     device->DestroyWindow = Wayland_DestroyWindow;
     device->SetWindowSize = Wayland_SetWindowSize;
+    device->SetWindowFullscreen = Wayland_SetWindowFullscreen;
 
     device->free = Wayland_DeleteDevice;
 
