@@ -43,7 +43,7 @@ typedef struct {
     struct wl_shell *shell;
 
     struct {
-        int32_t x, y, width, height;
+        int32_t x, y, width, height, refresh_rate;
     } screen_allocation;
 
     EGLDisplay edpy;

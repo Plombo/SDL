@@ -139,6 +139,7 @@ display_handle_mode(void *data,
     if (flags & WL_OUTPUT_MODE_CURRENT) {
         d->screen_allocation.width = width;
         d->screen_allocation.height = height;
+        d->screen_allocation.refresh_rate = refresh / 1000;
     }
 }
 
@@ -201,11 +202,15 @@ Wayland_VideoInit(_THIS)
     SDL_VideoDisplay display;
     SDL_DisplayMode mode;
 
+    /* Wait to receive screen size and refresh rate */
+    wayland_schedule_write(data);
+    wl_display_roundtrip(data->display);
+
     /* Use a fake 32-bpp desktop mode */
     mode.format = SDL_PIXELFORMAT_RGB888;
     mode.w = data->screen_allocation.width;
     mode.h = data->screen_allocation.height;
-    mode.refresh_rate = 0;
+    mode.refresh_rate = data->screen_allocation.refresh_rate;
     mode.driverdata = NULL;
     SDL_zero(display);
     display.desktop_mode = mode;
@@ -228,7 +233,7 @@ Wayland_GetDisplayModes(_THIS, SDL_VideoDisplay *sdl_display)
 
     mode.w = data->screen_allocation.width;
     mode.h = data->screen_allocation.height;
-    mode.refresh_rate = 0;
+    mode.refresh_rate = data->screen_allocation.refresh_rate;
     mode.driverdata = NULL;
 
     mode.format = SDL_PIXELFORMAT_RGB888;
