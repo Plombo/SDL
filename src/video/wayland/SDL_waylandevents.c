@@ -110,7 +110,9 @@ pointer_handle_motion(void *data, struct wl_pointer *pointer,
     int sx = wl_fixed_to_int(sx_w);
     int sy = wl_fixed_to_int(sy_w);
 
-    SDL_SendMouseMotion(window->sdlwindow, 0, sx, sy);
+    if (window) {
+        SDL_SendMouseMotion(window->sdlwindow, 0, sx, sy);
+    }
 }
 
 static void
