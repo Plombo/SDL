@@ -159,21 +159,17 @@ Wayland_GL_CreateContext(_THIS, SDL_Window *window)
     const EGLint *attribs = NULL;
     int    client_version = 0;
 
-#if SDL_VIDEO_RENDER_OGL_ES2 
-    client_version = 2;
-#elif SDL_VIDEO_RENDER_OGL_ES
-    client_version = 1;
-#endif
+    client_version = _this->gl_config.major_version;
 
-#if SDL_VIDEO_RENDER_OGL_ES2 || SDL_VIDEO_RENDER_OGL_ES
-    const EGLint context_attribs[] = {
-        EGL_CONTEXT_CLIENT_VERSION, client_version,
-        EGL_NONE
-    };
+    if (_this->gl_config.use_egl) {
+        const EGLint context_attribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, client_version,
+            EGL_NONE
+        };
 
-    attribs = context_attribs;
-#endif
-
+        attribs = context_attribs;
+    }
+    // TODO: OpenGL core contexts
 
     data->context = eglCreateContext(data->edpy, data->econf,
                                      EGL_NO_CONTEXT, attribs);
