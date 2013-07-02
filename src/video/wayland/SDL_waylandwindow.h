@@ -40,6 +40,10 @@ typedef struct {
     struct wl_shell_surface *shell_surface;
     struct wl_egl_window *egl_window;
     EGLSurface esurf;
+    struct {
+        int w;
+        int h;
+    } toplevel_dims;
 
     struct SDL_WaylandInput *keyboard_device;
 } SDL_WaylandWindow;

@@ -25,6 +25,7 @@
 #include "SDL_config.h"
 
 #include "../SDL_sysvideo.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_waylandwindow.h"
 #include "SDL_waylandvideo.h"
@@ -40,6 +41,13 @@ static void
 handle_configure(void *data, struct wl_shell_surface *shell_surface,
                  uint32_t edges, int32_t width, int32_t height)
 {
+    SDL_WaylandWindow *wind = data;
+
+    if (width != wind->sdlwindow->w || height != wind->sdlwindow->h) {
+        wl_egl_window_resize(wind->egl_window, width, height, 0, 0);
+        SDL_SendWindowEvent(wind->sdlwindow, SDL_WINDOWEVENT_RESIZED,
+                            width, height);
+    }
 }
 
 static void
@@ -112,6 +120,9 @@ int Wayland_CreateWindow(_THIS, SDL_Window *window)
         return -1;
     }
 
+    data->toplevel_dims.w = window->w;
+    data->toplevel_dims.h = window->h;
+
     if (data->shell_surface) {
         wl_shell_surface_set_user_data(data->shell_surface, data);
         wl_shell_surface_add_listener(data->shell_surface,
@@ -152,19 +163,34 @@ void Wayland_DestroyWindow(_THIS, SDL_Window *window)
 void Wayland_SetWindowSize(_THIS, SDL_Window *window)
 {
     SDL_WaylandWindow *wind = window->driverdata;
+    wind->toplevel_dims.w = window->w;
+    wind->toplevel_dims.h = window->h;
     wl_egl_window_resize(wind->egl_window, window->w, window->h, 0, 0);
 }
 
 void Wayland_SetWindowFullscreen(_THIS, SDL_Window *window, SDL_VideoDisplay *display, SDL_bool fullscreen)
 {
     SDL_WaylandWindow *wind = window->driverdata;
+    int new_width, new_height;
 
     if (fullscreen) {
         wl_shell_surface_set_fullscreen(wind->shell_surface,
                                         WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                                         0, NULL);
+        new_width = wind->waylandData->screen_allocation.width;
+        new_height = wind->waylandData->screen_allocation.height;
     } else {
         wl_shell_surface_set_toplevel(wind->shell_surface);
+        new_width = wind->toplevel_dims.w;
+        new_height = wind->toplevel_dims.h;
+    }
+
+    if (new_width != window->w || new_height != window->h) {
+        wl_egl_window_resize(wind->egl_window, new_width, new_height, 0, 0);
+        if (!fullscreen) {
+            SDL_SendWindowEvent(wind->sdlwindow, SDL_WINDOWEVENT_RESIZED,
+                                new_width, new_height);
+        }
     }
 }
 
